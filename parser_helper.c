@@ -55,24 +55,23 @@ size_t parseHttpHeader(void *buf)
 
 
 /* parsePortNumber 
- * purpose: parse the port number from HTTP header
+ * purpose: parse the port number from HTTP header in 
+ *          client's request
  * return: if specified, the port number is returned
- *          else, default SERVER_PORT is returned 
+ *         else, default SERVER_PORT is returned 
  * param:
  *      buf: http request sent from client
 */
 int parsePortNumber(void *buf)
 {
   assert(buf != NULL);
-  buf += '\0';
   char portNumber[10];/* TCP maximum port number is 65,535 */
-  void *protocol = strstr(buf, Protocol);
-  buf -= '\0';
-  if (protocol == NULL) return SERVER_PORT;
+  void *protocol = strstr(buf, Protocol);/* guaranteed for legal HTTP response */
   void *startIndex = protocol;
-  while(*(char *)startIndex != '/') {
-    if (*(char *)startIndex == ':' ){
-      sscanf(startIndex+1, "%[^ HTTP]", portNumber);
+  while(*(char *)startIndex != '/') {/* iterate backwards from HTTP/1.1 */
+    if (*(char *)startIndex == ':' ){/* legal portnumber follows semicolon */
+      /* drop the space character */
+      sscanf(startIndex + 1, "%[^ HTTP]", portNumber);
       return atoi(portNumber);
     }
     startIndex -= 1;
@@ -91,21 +90,19 @@ int parsePortNumber(void *buf)
 */
 void createContentKey(char **contentKey, void *buf)
 {
-  // char portNumber[10];
-  // *contentKey = calloc(100, sizeof(char));
-  // memcpy(*contentKey, hostname, strlen(hostname));
-  // sprintf(portNumber, ":%d", portnumber);
-  // strncat(*contentKey, portNumber, strlen(portNumber));
-  // printf("current key is %s", *contentKey);
   *contentKey = calloc(100, sizeof(char));
   sscanf(buf+11, "%[^ HTTP]", *contentKey);
-  printf("contentkey generated is %s\n", *contentKey);
   
 }
 
-/* */
-
-float parseMaxAge(void *buf)
+/* parseMaxAge 
+ * purpose: parse the max-age field in the HTTP response header
+ * return:  max-age provided by the HTTP response header
+ * param: 
+ *      void *buf: buffer content that parsing is completed on
+ *
+*/
+int parseMaxAge(void *buf)
 {
   assert(buf != NULL);
   char ageField[BUFSIZE];
@@ -115,9 +112,7 @@ float parseMaxAge(void *buf)
   } else {
     endofHeader += strlen(CACHE_AGE);
     sscanf(endofHeader, "%[^\r\n]", ageField);
-    printf("read %d",atoi(ageField));
-    return (float)atoi(ageField);
+    return atoi(ageField);
   }
-  
 }
 
