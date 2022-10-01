@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+Date: Fri, 30 Sep 2022 01:35:08 GMT
+Server: Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.2k-fips Phusion_Passenger/6.0.14 PHP/5.4.16 mod_wsgi/3.4 Python/2.7.5
+Last-Modified: Sat, 01 May 2021 15:42:11 GMT
+ETag: "18b1-5c146926a5c88"
+Accept-Ranges: bytes
+Content-Length: 6321
+Content-Type: text/html; charset=UTF-8
+Cache-Control: max-age=N
+Age: [what cache provides]
