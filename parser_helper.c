@@ -81,7 +81,14 @@ int parsePortNumber(void *buf)
   
 }
 
-// TODO fix hostname to get the entire link and then port
+/* createContentKey 
+ * purpose: parse out the request address as the contentkey
+ *          for proxy cache storage
+ * return:  None
+ * param: 
+ *      char **contentKey: pointer to contentKey 
+ *      void *buf: buffer content that parsing is completed on
+*/
 void createContentKey(char **contentKey, void *buf)
 {
   // char portNumber[10];
@@ -91,10 +98,12 @@ void createContentKey(char **contentKey, void *buf)
   // strncat(*contentKey, portNumber, strlen(portNumber));
   // printf("current key is %s", *contentKey);
   *contentKey = calloc(100, sizeof(char));
-  sscanf(buf+12, "%[^ HTTP]", *contentKey);
+  sscanf(buf+11, "%[^ HTTP]", *contentKey);
   printf("contentkey generated is %s\n", *contentKey);
   
 }
+
+/* */
 
 float parseMaxAge(void *buf)
 {
