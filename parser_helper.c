@@ -4,7 +4,8 @@
 #define ContentLength "Content-Length: "
 #define HeaderEnd "\r\n\r\n"
 #define Protocol "HTTP/1.1"
-#define CACHE_AGE "Cache-Control: maxAge="
+#define CACHE_AGE "Cache-Control: max-age="
+#define HOST "Host: "
 
 
 char *
@@ -27,9 +28,9 @@ substr(const char *src, size_t start, size_t len)
 */
 size_t parseContentLength(void *buf)
 {
-  printf("isseu is in parse_helper");
   char contentLength[BUFSIZE];
-  char *intermediate = strstr(buf, ContentLength);
+  void *intermediate = NULL;
+  intermediate = strstr(buf, ContentLength);
   intermediate += strlen(ContentLength);
   sscanf(intermediate, "%[^\r\n]", contentLength);
   return atoi(contentLength);
@@ -52,6 +53,30 @@ size_t parseHttpHeader(void *buf)
   return (endofHeader != NULL) ? (endofHeader - buf + 2) : -1;
 }
 
+/* parseHostName 
+ * purpose: parse the Host field in the HTTP header
+ * prereq: Host is present as a HTTP field 
+ * return: None 
+ * note: 
+ *    hostname will be updated with host field 
+ *    port_number will be updated with provide port number,
+ *             (default to 80 if not provided)
+*/
+void parseHostName(void *request_header, char **hostname, int *port_number)
+{
+    char *host_field = "Host: ";
+    char portNumber[10];
+    char response[BUFSIZE];
+    void *intermediate = strstr(request_header, host_field);
+    assert(intermediate != NULL);
+    intermediate += strlen(host_field);
+    sscanf(intermediate, "%[^\r\n]", response);
+    int found = parsePortNumber(response, port_number);
+    if (found) sscanf(response, "%[^:]", *hostname);
+    else memcpy(*hostname, response, strlen(response));
+    
+
+}
 
 
 /* parsePortNumber 
@@ -62,21 +87,28 @@ size_t parseHttpHeader(void *buf)
  * param:
  *      buf: http request sent from client
 */
-int parsePortNumber(void *buf)
+int parsePortNumber(void *hostname, int *portnumber)
 {
-  assert(buf != NULL);
   char portNumber[10];/* TCP maximum port number is 65,535 */
-  void *protocol = strstr(buf, Protocol);/* guaranteed for legal HTTP response */
-  void *startIndex = protocol;
-  while(*(char *)startIndex != '/') {/* iterate backwards from HTTP/1.1 */
-    if (*(char *)startIndex == ':' ){/* legal portnumber follows semicolon */
-      /* drop the space character */
-      sscanf(startIndex + 1, "%[^ HTTP]", portNumber);
-      return atoi(portNumber);
-    }
-    startIndex -= 1;
+  
+  int index = 0;
+  void *protocol = strstr(hostname, ":");
+  if (protocol == NULL) {
+    *portnumber = SERVER_PORT;
+    return 0;
+  } 
+  
+  while (index < strlen(hostname)){
+    if (*(char *)(hostname + index) == ':'){
+      memcpy(portNumber, hostname + index + 1, strlen(hostname) - index - 1);
+      *portnumber = atoi(portNumber);
+      break;
+    } 
+    index += 1;
   }
-  return SERVER_PORT;
+
+  
+  return 1;
   
 }
 
@@ -90,8 +122,10 @@ int parsePortNumber(void *buf)
 */
 void createContentKey(char **contentKey, void *buf)
 {
+  int index = 0;
   *contentKey = calloc(100, sizeof(char));
   sscanf(buf+11, "%[^ HTTP]", *contentKey);
+  
   
 }
 
@@ -112,7 +146,13 @@ int parseMaxAge(void *buf)
   } else {
     endofHeader += strlen(CACHE_AGE);
     sscanf(endofHeader, "%[^\r\n]", ageField);
+    printf("what is read %s\n",ageField);
     return atoi(ageField);
   }
 }
 
+
+int divRoundClosest(const long n, const long d)
+{
+  return ((n < 0) ^ (d < 0)) ? ((n - d/2)/d) : ((n + d/2)/d);
+}

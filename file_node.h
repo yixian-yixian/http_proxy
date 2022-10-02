@@ -19,7 +19,7 @@ typedef struct linkedNode* Node;
 struct linkedNode{
     char *fileName;
     void *fileContent;
-    float entryTime;
+    long entryTime;
     int maxAge;
     size_t contentSize;
     Node prev;
@@ -27,9 +27,9 @@ struct linkedNode{
 };
 
 
-Node initNode(char *name, void *inputContent, int maxAge, float entryTime, size_t contentSize);
+Node initNode(char *name, void *inputContent, int maxAge, long entryTime, size_t contentSize);
 void freeNode(Node target);
-void updateNode(Node target, void *content, int maxAge, size_t contentSize, float entryTime);
+// void updateNode(Node target, void *content, int maxAge, size_t contentSize, long entryTime);
 void putNewNode(Node head, Node node_ptr);
 void removeNode(Node node_ptr);
 void freeLinkedlist(Node head);

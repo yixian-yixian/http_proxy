@@ -159,6 +159,8 @@ int main(int argc, char **argv) {
     /* 
      * write: echo the input string back to the client 
      */
+    bzero(buf, BUFSIZE);
+    
     n = write(childfd, buf, strlen(buf));
     if (n < 0) 
       error("ERROR writing to socket");

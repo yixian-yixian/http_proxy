@@ -9,32 +9,19 @@ Node findNodeinLL(Node head, char *fileName);
  *              float entryTime, size_t contentSize)
  * purpose: create a new node in cache
  */
-void 
-createNewNode(Cache_T ORG, char *name, void *inputContent, size_t contentSize, float entryTime, int maxAge)
+Node 
+createNewNode(Cache_T ORG, char *name, void *inputContent, size_t contentSize, long entryTime, int maxAge)
 {
     if (shouldEvict(ORG)){ /* check if full cache */
-        printf("evicting\n");
         evictCache(ORG, entryTime);
     } /* new insertion for absent filenode */
     if (maxAge == 0) maxAge = MAX_AGE;
     Node node_add = initNode(name, inputContent, maxAge, entryTime, contentSize);
-    printf("initialized node size %d with seconds %d \n\n", node_add->contentSize, node_add->maxAge);
-    printNode(node_add);
     putNewNode(ORG->getHead, node_add);
     ORG->currSize++;
+    return node_add;
 }
 
-/* updateNodeinCache
- * update the content of a provided node and update its position index 
-*/
-void 
-updateNodeinCache(Cache_T ORG, Node target, void *responseContent, 
-                    size_t contentSize, float currTime, int max_age)
-{
-    if (max_age == 0) max_age = MAX_AGE;
-    updateNode(target, responseContent, max_age, contentSize, currTime);
-    
-}
 
 /* isStale()
  * purpose: check if the provided target node has gone stale according
@@ -46,11 +33,11 @@ updateNodeinCache(Cache_T ORG, Node target, void *responseContent,
  *          target: pointer to the target filenode
 */
 bool 
-isStale(float currTime, Node target)
+isStale(long currTime, Node target)
 {
     assert(target != NULL);
-    float timeElapsed = (currTime - target->entryTime) / pow(10,9);
-    if (timeElapsed > (float)target->maxAge) return true;
+    long timeElapsed = (currTime - target->entryTime) / 1.0e9;
+    if (timeElapsed > target->maxAge) return true;
     return target->maxAge == 0 ? true : false;
 }
 
@@ -127,8 +114,6 @@ retreiveOnce(Cache_T ORG, Node target, void **responsebody)
 {
     assert(target != NULL);
     Node newPos = movetoHead(ORG->getHead, target);
-    printf("inside retrieved once \n");
-    printNode(newPos);
     *responsebody = newPos->fileContent;
     return newPos;
 }
@@ -151,6 +136,7 @@ findOldestStale(Cache_T ORG, float currTime)
     Node oldest = findOldestStaleinGET(ORG, currTime);
     return oldest;
 }
+
 
 /* evictCache
  * purpose: following the evicting cache policy to consider which node to evict 

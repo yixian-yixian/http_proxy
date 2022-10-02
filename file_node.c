@@ -12,7 +12,7 @@
  *          entryTime: initial storage time of the file          
  */
 
-Node initNode(char *name, void *inputContent, int maxAge, float entryTime, size_t contentSize)
+Node initNode(char *name, void *inputContent, int maxAge, long entryTime, size_t contentSize)
 {
     Node prod = malloc(sizeof(struct linkedNode));
     char *storeFilename = calloc(strlen(name)+1, sizeof(char)); 
@@ -95,8 +95,6 @@ Node movetoHead(Node head, Node target)
     Node curr = initNode(target->fileName, newContent, target->maxAge, target->entryTime, target->contentSize);
     removeNode(target);
     putNewNode(head, curr);
-    printf("insde move tohead \n\n");
-    printNode(curr);
     return curr;
 }
 
@@ -115,7 +113,7 @@ void popTail(Node tail)
  * purpose: update a target node's certain field with new value
  * use case: a file node is PUT again and with new content and information
 */
-void updateNode(Node target, void *content, int maxAge, size_t contentSize, float entryTime)
+void updateNode(Node target, void *content, int maxAge, size_t contentSize, long entryTime)
 {
     free(target->fileContent);
     target->fileContent = content;

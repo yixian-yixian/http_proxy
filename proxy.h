@@ -19,7 +19,6 @@
 #define BUFSIZE 1024
 
 void error(char *msg);
-void parseHostName(void *request_header, char *hostname, int *port_number);
 size_t sendtoServer(char *hostname, int portno, void *buf, void **response);
 size_t readResponseFromServer(int fd, void **buffer_addr);
-size_t createCacheHeader(Node outputNode, void **output, float age);
+size_t createCacheHeader(Node outputNode, void **output, int age);
