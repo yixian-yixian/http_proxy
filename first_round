@@ -1,5 +1,5 @@
 HTTP/1.1 200 OK
-Date: Sat, 01 Oct 2022 22:46:42 GMT
+Date: Sun, 02 Oct 2022 04:18:40 GMT
 Server: Apache/2.4.18 (Ubuntu)
 Set-Cookie: SHIBLOCATION=tilde; path=/; domain=.cs.cmu.edu
 Accept-Ranges: bytes
@@ -7,7 +7,7 @@ Vary: Accept-Encoding
 Content-Length: 8458
 Content-Type: text/html
 Set-Cookie: BALANCEID=balancer.web39.srv.cs.cmu.edu; path=/;
-Set-Cookie: BIGipServer~SCS~cs-userdir-pool-80=550109824.20480.0000; path=/; Httponly
+Set-Cookie: BIGipServer~SCS~cs-userdir-pool-80=533332608.20480.0000; path=/; Httponly
 
 <html xmlns:v="urn:schemas-microsoft-com:vml"
 xmlns:o="urn:schemas-microsoft-com:office:office"

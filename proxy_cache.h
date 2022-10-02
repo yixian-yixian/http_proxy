@@ -19,15 +19,15 @@ struct cache {
     Node getHead, getTail;
 };
 
-void createNewNode(Cache_T ORG, char *name, void *inputContent, size_t contentSize, float entryTime, int maxAge);
+Node createNewNode(Cache_T ORG, char *name, void *inputContent, size_t contentSize, long entryTime, int maxAge);
 
 Cache initializeCache(size_t capacity);
 void cleanCache(Cache ORG);
-void updateNodeinCache(Cache_T ORG, Node target, void *responseContent, size_t contentSize, float currTime, int max_age);
+// void updateNodeinCache(Cache_T ORG, Node target, void *responseContent, size_t contentSize, long currTime, int max_age);
 Node retreiveOnce(Cache_T ORG, Node target, void **responsebody);
 Node findNode(Cache_T ORG, char *keyName);
 void evictCache(Cache_T ORG, float currTime);
-bool isStale(float currTime, Node target);
+bool isStale(long currTime, Node target);
 bool shouldEvict(Cache_T ORG);
 void printlist(Node head);
 
