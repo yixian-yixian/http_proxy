@@ -13,6 +13,7 @@
 
 #include "proxy.h"
 #include "proxy_cache.h"
+#include "parser_helper.h"
 
 int main(int argc, char **argv)
 {
@@ -101,8 +102,9 @@ int main(int argc, char **argv)
         char *contentkey = NULL;
         int requestPort;
         parseHostName(buf, &hostname, &requestPort);
-        printf("hostname %s, request port %d\n", hostname,requestPort);
+        printf("hostname [%s], request port [%d]\n", hostname,requestPort);
         createContentKey(&contentkey, buf); 
+        printf("contentkey generated %s\n", contentkey);
         void *responsebody = NULL, *output = NULL;
         Node node_add = findNode(&proxy_cache, contentkey);
         
@@ -117,7 +119,6 @@ int main(int argc, char **argv)
             /* stale and nonpresent nodes both require additional update in age and time field */
             if (node_add != NULL) removeNode(node_add);
             /* first send request to server */
-            printf("hostnaem %s\n", hostname);
             responseSize = sendtoServer(hostname, requestPort, buf, &responsebody);
             if (responseSize < 0) {
                 error("ERROR on communication with request server\n");
@@ -138,7 +139,9 @@ int main(int argc, char **argv)
     
 }
 // int main(void){
-//     char *target = "Cache-Control: max-age=30\r\n";
-//     int maxage = parseMaxAge(target);
-//     printf("maxage %d\n", maxage);
+//     char *target = "Cache-Control: max-age=  980 \r\n\0";
+//     char *lowercase;
+//     int age = parseMaxAge(target);
+//     // convertAlltolowercase(target, &lowercase);
+//     // printf("%s\n", lowercase);
 // }

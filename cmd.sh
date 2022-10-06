@@ -1,4 +1,4 @@
 make clean
 make
-valgrind ./a.out 9196
-# ./a.out 9196
+valgrind  --track-origins=yes ./a.out 9195
+# ./a.out 9195
