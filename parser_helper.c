@@ -90,8 +90,6 @@ void parseHostName(void *request_header, char **hostname, int *port_number)
     convertAlltolowercase(*hostname, &final_lower_case);
     free(*hostname);
     *hostname = final_lower_case;
-
-
 }
 
 
@@ -133,11 +131,16 @@ int parsePortNumber(char *hostname, int *portnumber)
 void createContentKey(char **contentKey, void *buf)
 {
   int index = 0;
-  printf("current buf [%s]\n", buf);
   char *content_key_field = calloc(100, sizeof(char));
-  void *httpField = strstr(buf + 11, " ");
+  printf("current buf %s\n", buf);
+  void *httpField = strstr(buf + 3, "HTTP");
+  printf("current buf [%s]\n", buf);
+  // int index = 0;
+  // char *content_key_field = calloc(100, sizeof(char));
+  // void *httpField = strstr(buf + 11, " ");
   printf("http field [%s]\n", httpField);
-  memcpy(content_key_field, buf+11, httpField - (buf + 11));
+  memcpy(content_key_field, buf + 4, httpField - (buf + 5));
+  
   printf("content_key_field [%s]\n", content_key_field);
   content_key_field = realloc(content_key_field, strlen(content_key_field)+1);
   while (index < strlen(content_key_field)){

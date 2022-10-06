@@ -90,6 +90,8 @@ size_t sendtoServer(char *hostname, int portno, void *buf, void **response)
     int sockfd, n;
     struct sockaddr_in serveraddr;
     struct hostent *server;
+    printf("current hostname [%s] portno [%d]\n", hostname, portno);
+    printf("current buffer %s\n", buf);
 
     /* socket: create the socket */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -109,6 +111,7 @@ size_t sendtoServer(char *hostname, int portno, void *buf, void **response)
     bcopy((char *)server->h_addr, 
 	  (char *)&serveraddr.sin_addr.s_addr, server->h_length);
     serveraddr.sin_port = htons(portno);
+
 
     /* connect: create a connection with the server */
     if (connect(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) 
