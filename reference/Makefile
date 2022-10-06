@@ -4,13 +4,12 @@ CC = gcc
 LDFLAGS = -lnsl
 
 a.out: $(obj)
-	$(CC) -o $@ $^ $(LDFLAGS) -lm
-
-server: tcpserver.c 
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-client: tcpclient.c 
+tcpserver: tcpserver.c 
 	$(CC) -o $@ $^ $(LDFLAGS)
+
+
 
 .PHONY: clean
 clean:

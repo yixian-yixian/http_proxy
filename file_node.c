@@ -90,8 +90,8 @@ void removeNode(Node node_ptr)
 */
 Node movetoHead(Node head, Node target)
 {
-    void *newContent = malloc(target->contentSize);
-    memcpy(newContent, target->fileContent, target->contentSize);
+    void *newContent = malloc(target->contentSize + 1);
+    memcpy(newContent, target->fileContent, target->contentSize + 1);
     Node curr = initNode(target->fileName, newContent, target->maxAge, target->entryTime, target->contentSize);
     removeNode(target);
     putNewNode(head, curr);

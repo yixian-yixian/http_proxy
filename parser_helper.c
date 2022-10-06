@@ -1,10 +1,10 @@
 #include "parser_helper.h"
 
 #define BUFSIZE 1024
-#define ContentLength "Content-Length: "
+#define CL "Content-Length: "
 #define HeaderEnd "\r\n\r\n"
 #define Protocol "HTTP/1.1"
-#define CACHE_AGE "Cache-Control: max-age="
+#define CACHE_AGE "cache-control: max-age"
 #define HOST "Host: "
 
 
@@ -19,6 +19,18 @@ substr(const char *src, size_t start, size_t len)
   return dest;
 }
 
+// TODO - client of the function to free the extra copy
+void convertAlltolowercase(void *buf, char **product)
+{
+  size_t totalLen = strlen(buf), index = 0;
+  char *lowercaseString = calloc(totalLen + 1, sizeof(char));
+  while (index < totalLen) {
+    lowercaseString[index] = tolower(*(char *)(buf + index));
+    index += 1;
+  }
+  *product = lowercaseString;
+}
+
 /* parseContentLength
  * purpose: parse the Content-Length field of the HTTP header
  * prereq: Content-Length is guaranteed to be present in buf
@@ -29,9 +41,9 @@ substr(const char *src, size_t start, size_t len)
 size_t parseContentLength(void *buf)
 {
   char contentLength[BUFSIZE];
-  void *intermediate = NULL;
-  intermediate = strstr(buf, ContentLength);
-  intermediate += strlen(ContentLength);
+  void *endofHeader = strstr(buf, HeaderEnd);
+  void *intermediate = strstr(buf, CL);
+  intermediate += strlen(CL);
   sscanf(intermediate, "%[^\r\n]", contentLength);
   return atoi(contentLength);
 }
@@ -66,15 +78,19 @@ void parseHostName(void *request_header, char **hostname, int *port_number)
 {
     char *host_field = "Host: ";
     char portNumber[10];
-    char response[BUFSIZE];
+    char *response = calloc(BUFSIZE, sizeof(char));
     void *intermediate = strstr(request_header, host_field);
-    assert(intermediate != NULL);
-    intermediate += strlen(host_field);
+    assert(intermediate != NULL);/* guaranteed to be present */
+    intermediate += strlen(host_field);/* read the entirty of Host line */
     sscanf(intermediate, "%[^\r\n]", response);
     int found = parsePortNumber(response, port_number);
     if (found) sscanf(response, "%[^:]", *hostname);
     else memcpy(*hostname, response, strlen(response));
-    
+    char *final_lower_case;
+    convertAlltolowercase(*hostname, &final_lower_case);
+    free(*hostname);
+    *hostname = final_lower_case;
+
 
 }
 
@@ -87,9 +103,9 @@ void parseHostName(void *request_header, char **hostname, int *port_number)
  * param:
  *      buf: http request sent from client
 */
-int parsePortNumber(void *hostname, int *portnumber)
+int parsePortNumber(char *hostname, int *portnumber)
 {
-  char portNumber[10];/* TCP maximum port number is 65,535 */
+  char port_number_field[10];/* TCP maximum port number is 65,535 */
   
   int index = 0;
   void *protocol = strstr(hostname, ":");
@@ -97,15 +113,9 @@ int parsePortNumber(void *hostname, int *portnumber)
     *portnumber = SERVER_PORT;
     return 0;
   } 
-  
-  while (index < strlen(hostname)){
-    if (*(char *)(hostname + index) == ':'){
-      memcpy(portNumber, hostname + index + 1, strlen(hostname) - index - 1);
-      *portnumber = atoi(portNumber);
-      break;
-    } 
-    index += 1;
-  }
+  memcpy(port_number_field, protocol + 1, strlen(hostname) - (protocol - (void *)hostname));
+  printf("port number field %s\n", port_number_field);
+  *portnumber = atoi(port_number_field);
 
   
   return 1;
@@ -123,8 +133,20 @@ int parsePortNumber(void *hostname, int *portnumber)
 void createContentKey(char **contentKey, void *buf)
 {
   int index = 0;
-  *contentKey = calloc(100, sizeof(char));
-  sscanf(buf+11, "%[^ HTTP]", *contentKey);
+  printf("current buf [%s]\n", buf);
+  char *content_key_field = calloc(100, sizeof(char));
+  void *httpField = strstr(buf + 11, " ");
+  printf("http field [%s]\n", httpField);
+  memcpy(content_key_field, buf+11, httpField - (buf + 11));
+  printf("content_key_field [%s]\n", content_key_field);
+  content_key_field = realloc(content_key_field, strlen(content_key_field)+1);
+  while (index < strlen(content_key_field)){
+    char lowercase = tolower(content_key_field[index]);
+    content_key_field[index] = lowercase;
+    index += 1;
+  }
+  *contentKey = content_key_field;
+  
   
   
 }
@@ -139,16 +161,23 @@ void createContentKey(char **contentKey, void *buf)
 int parseMaxAge(void *buf)
 {
   assert(buf != NULL);
-  char ageField[BUFSIZE];
-  void *endofHeader = strstr(buf, CACHE_AGE);
+  char ageField[BUFSIZE], intermediate[BUFSIZE];
+  char *lowercaseHeader = NULL;
+  sscanf(buf, "%[^\r\n\r\n]", intermediate);
+  convertAlltolowercase(intermediate, &lowercaseHeader);
+  void *endofHeader = strstr(lowercaseHeader, CACHE_AGE);
+  int age, index = 0;
   if (endofHeader == NULL) {
-    return 0;
+    age = 0;
   } else {
     endofHeader += strlen(CACHE_AGE);
+    while(isdigit(*(char *)endofHeader) == 0) endofHeader += 1;
     sscanf(endofHeader, "%[^\r\n]", ageField);
     printf("what is read %s\n",ageField);
-    return atoi(ageField);
+    age = atoi(ageField);
   }
+  free(lowercaseHeader);
+  return age;
 }
 
 

@@ -30,25 +30,22 @@ int signalExit(char *msg){
 */
 size_t readResponseFromServer(int fd, void **buffer_addr)
 {
-  printf("server not responding?");
   size_t totalBytesRead = 0, chunk = 0, headerSize = 0;
-  void *temporaryBuf = malloc(sizeof(char) * DEFAULT_SIZE);
+  void *temporaryBuf = calloc(DEFAULT_SIZE, sizeof(char));
   chunk = read(fd, temporaryBuf, BUFSIZE);
   while ((headerSize = parseHttpHeader(temporaryBuf)) == -1) {
-    printf("inside first loop \n");
     totalBytesRead += chunk;
     chunk = read(fd, temporaryBuf + totalBytesRead, DEFAULT_SIZE - totalBytesRead);
   }
   size_t contentLength = parseContentLength(temporaryBuf);
-  printf("contentLength successfully read\n");
   while(totalBytesRead <= contentLength && chunk > 0){
-    printf("currently reading %d", chunk);
     totalBytesRead += chunk;
     chunk = read(fd, temporaryBuf + totalBytesRead, DEFAULT_SIZE - totalBytesRead);
     // move the chunk break initailly here to outside while loop
     if (chunk < 0) return -1;
   }
   
+  temporaryBuf = realloc(temporaryBuf, totalBytesRead + 1); //add null character at the end
   *buffer_addr = temporaryBuf;
   return totalBytesRead;
   
@@ -99,7 +96,6 @@ size_t sendtoServer(char *hostname, int portno, void *buf, void **response)
     if (sockfd < 0) error("ERROR opening socket");
 
     /* gethostbyname: get the server's DNS entry */
-    printf("host name is %s\n", hostname);
     server = gethostbyname(hostname);
 
     if (server == NULL) {
