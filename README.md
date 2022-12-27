@@ -1,5 +1,5 @@
 # HTTP Proxy (in C)
-version control purpose for assignment 1 proxy 
+This project is a proxy based in C language that provides non-security communications over HTTP requests. It supports regular GET and POST request (another project is https_proxy supports security communications for HTTPS requests).
 
 - proxy.h: handles connections with server 
 - proxy_cache.h: facilitates caching communication for proxy establishment 
